@@ -1,0 +1,33 @@
+{
+  "usuarios": [
+    {
+      "id": 1,
+      "nombre": "Admin",
+      "email": "admin@sumetra.com",
+      "password": "123456",
+      "rol": "admin"
+    },
+    {
+      "id": 2,
+      "nombre": "Pedro",
+      "email": "pedro@gmail.com",
+      "password": "123456",
+      "rol": "usuario"
+    },
+    {
+      "nombre": "kevin",
+      "email": "kevin@gmail.com",
+      "password": "12345",
+      "rol": "usuario",
+      "id": 3
+    }
+  ],
+  "productos": [
+    {
+      "id": 1,
+      "nombre": "Laptop Pro",
+      "precio": 1200,
+      "categoria": "Tecnología"
+    }
+  ]
+}

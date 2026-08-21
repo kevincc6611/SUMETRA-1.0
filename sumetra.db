@@ -1,0 +1,21 @@
+CREATE DATABASE sumetra_db;
+USE sumetra_db;
+
+CREATE TABLE ingresos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    monto DECIMAL(10,2),
+    fecha DATE
+);
+
+CREATE TABLE gastos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    monto DECIMAL(10,2),
+    fecha DATE
+);
+
+CREATE TABLE productos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100),
+    precio DECIMAL(10,2),
+    stock INT
+);
