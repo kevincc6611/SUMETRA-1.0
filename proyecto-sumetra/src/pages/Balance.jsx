@@ -1,115 +1,22 @@
-// Hooks para consultar datos y actualizar la pantalla.
 import { useEffect, useState } from "react";
-// Consultas de ingresos y gastos almacenados en MySQL.
-import { leerGastos, leerIngresos } from "../services/api";
-import "../styles/balance.css";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-} from "chart.js";
-import { Bar, Pie } from "react-chartjs-2";
+import { balanceApi } from "../services/api";
+import { BalanceLine, TotalsBar } from "../components/FinanceChart";
+import { formatCurrency, LoadingScreen, Notice, PageHeader } from "../components/UI";
 
-// Registrar los componentes necesarios de Chart.js
-// Registra los componentes de Chart.js utilizados por los gráficos.
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend,
-  ArcElement
-);
-
-// Calcula y presenta la situación financiera del negocio.
-function Balance() {
-  // Datos obtenidos desde las tablas de ingresos y gastos.
-  const [ingresos, setIngresos] = useState([]);
-  const [gastos, setGastos] = useState([]);
-  // Mensaje mostrado si falla alguna consulta.
-  const [mensaje, setMensaje] = useState("");
+export default function Balance() {
+  const [filters, setFilters] = useState({ desde: "", hasta: "" });
+  const [applied, setApplied] = useState(filters);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Solicita ambas tablas al mismo tiempo al abrir la pantalla.
-    Promise.all([leerIngresos(), leerGastos()])
-      .then(([ingresosData, gastosData]) => {
-        setIngresos(ingresosData);
-        setGastos(gastosData);
-      })
-      .catch((error) => setMensaje(`No se pudo cargar el balance: ${error.message}`));
-  }, []);
+    setLoading(true); setError("");
+    balanceApi.get(applied).then(setData).catch((err) => setError(err.message)).finally(() => setLoading(false));
+  }, [applied]);
 
-  // Convierte los montos de MySQL y calcula los totales financieros.
-  const totalIngresos = ingresos.reduce((acc, ingreso) => acc + Number(ingreso.monto), 0);
-  const totalGastos = gastos.reduce((acc, gasto) => acc + Number(gasto.monto), 0);
-  const balanceFinal = totalIngresos - totalGastos;
+  const submit = (event) => { event.preventDefault(); if (filters.desde && filters.hasta && filters.desde > filters.hasta) return setError("La fecha inicial no puede ser posterior a la final."); setApplied({ ...filters }); };
+  const summary = data?.resumen || {};
 
-  // Datos que alimentan el gráfico comparativo de barras.
-  const dataBar = {
-    labels: ["Ingresos", "Gastos"],
-    datasets: [
-      {
-        label: "Totales",
-        data: [totalIngresos, totalGastos],
-        backgroundColor: ["#00c896", "#ff6b6b"],
-      },
-    ],
-  };
-
-  // Datos que alimentan el gráfico de distribución circular.
-  const dataPie = {
-    labels: ["Ingresos", "Gastos"],
-    datasets: [
-      {
-        data: [totalIngresos, totalGastos],
-        backgroundColor: ["#00c896", "#ff6b6b"],
-      },
-    ],
-  };
-
-  return (
-    <main className="contenedor">
-      <h2>Balance General</h2>
-
-      {mensaje && <p className="mensaje">{mensaje}</p>}
-
-      <div className="tarjeta resumen">
-        <h3>Total Ingresos</h3>
-        <p className="ingresos">${totalIngresos.toLocaleString()}</p>
-      </div>
-
-      <div className="tarjeta resumen">
-        <h3>Total Gastos</h3>
-        <p className="gastos">${totalGastos.toLocaleString()}</p>
-      </div>
-
-      <div className="tarjeta balance">
-        <h3>Resultado Neto</h3>
-        <p className={balanceFinal >= 0 ? "positivo" : "negativo"}>
-          {balanceFinal >= 0 ? "✅ Superávit" : "⚠️ Déficit"}: ${balanceFinal.toLocaleString()}
-        </p>
-      </div>
-
-      {/* Gráfico de barras */}
-      <div className="grafico">
-        <h3>Comparación Ingresos vs Gastos</h3>
-        <Bar data={dataBar} />
-      </div>
-
-      {/* Gráfico de pastel */}
-      <div className="grafico">
-        <h3>Distribución</h3>
-        <Pie data={dataPie} />
-      </div>
-    </main>
-  );
+  return <div className="page"><PageHeader eyebrow="Resultado operativo" title="Balance" description="Entradas menos salidas registradas. No equivale a estados financieros certificados." /><form className="filter-bar" onSubmit={submit}><label>Desde<input type="date" value={filters.desde} onChange={(e) => setFilters({ ...filters, desde: e.target.value })} /></label><label>Hasta<input type="date" value={filters.hasta} onChange={(e) => setFilters({ ...filters, hasta: e.target.value })} /></label><button className="button button-secondary" type="submit">Aplicar periodo</button><button className="button button-ghost" type="button" onClick={() => { setFilters({ desde: "", hasta: "" }); setApplied({ desde: "", hasta: "" }); }}>Limpiar</button></form><Notice type="error">{error}</Notice>{loading ? <LoadingScreen compact label="Calculando balance..." /> : data && <><section className="metric-grid metric-grid-three"><article className="metric-card metric-positive"><span>Total ingresos</span><strong>{formatCurrency(summary.ingresos)}</strong></article><article className="metric-card metric-negative"><span>Total gastos</span><strong>{formatCurrency(summary.gastos)}</strong></article><article className="metric-card"><span>Balance operativo</span><strong className={Number(summary.balance) < 0 ? "text-negative" : "text-positive"}>{formatCurrency(summary.balance)}</strong></article></section><div className="dashboard-grid"><section className="panel chart-panel"><div className="panel-heading"><h2>Evolución por periodo</h2></div><div className="chart-wrap"><BalanceLine series={data.serie || []} /></div></section><section className="panel chart-panel"><div className="panel-heading"><h2>Comparación total</h2></div><div className="chart-wrap"><TotalsBar income={summary.ingresos} expenses={summary.gastos} /></div></section></div></>}</div>;
 }
-
-export default Balance;
-

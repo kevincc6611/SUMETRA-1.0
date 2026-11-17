@@ -1,76 +1,48 @@
-// Componentes de React Router para crear la navegación de la aplicación.
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-
-// Componentes y páginas disponibles en el sistema Sumetra.
-import MenuPrincipal from "./componentes/MenuPrincipal";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
+import AppLayout from "./components/AppLayout";
 import Inicio from "./pages/Inicio";
-import Gastos from "./pages/Gastos";
-import Ingresos from "./pages/Ingresos";
-import Registro from "./pages/Registro";
 import Login from "./pages/Login";
+import Registro from "./pages/Registro";
 import Dashboard from "./pages/Dashboard";
 import Productos from "./pages/Productos";
-import Contacto from "./pages/Contacto";
+import Compras from "./pages/Compras";
+import Ventas from "./pages/Ventas";
+import Movimientos from "./pages/Movimientos";
 import Balance from "./pages/Balance";
+import Alertas from "./pages/Alertas";
+import Reportes from "./pages/Reportes";
+import Comprobante from "./pages/Comprobante";
+import Soporte from "./pages/Soporte";
+import Usuarios from "./pages/Usuarios";
+import ErrorPage from "./pages/ErrorPage";
 
-// Organiza el encabezado protegido y las rutas principales de la aplicación.
-function AppLayout() {
-  // Obtiene la ruta actual para decidir qué elementos de la interfaz mostrar.
-  const location = useLocation();
-
-  // Comprueba si existe una sesión iniciada en el navegador.
-  const usuarioLogeado = localStorage.getItem("usuarioSumetra");
-
-  // El encabezado no aparece en las pantallas públicas de inicio, login y registro.
-  const ocultarHeader = ["/", "/login", "/registro"].includes(location.pathname);
-
-  return (
-    <div className="app-shell">
-      {/* Encabezado y menú visibles únicamente para usuarios autenticados. */}
-      {!ocultarHeader && usuarioLogeado && (
-        <header className="topbar">
-          <div className="brand-wrap">
-            <span className="brand-mark">S</span>
-            <div>
-              <p className="brand-name">Sumetra</p>
-              <span className="brand-subtitle">Gestión financiera</span>
-            </div>
-          </div>
-
-          <div className="navigation-area">
-            <span className="navigation-label">Módulos del sistema</span>
-            <MenuPrincipal />
-          </div>
-        </header>
-      )}
-
-      <main className="page-content">
-  {/* Cada ruta renderiza la página correspondiente sin recargar el navegador. */}
-       <Routes>
-  <Route path="/" element={<Inicio />} />
-  <Route path="/registro" element={<Registro />} />
-  <Route path="/login" element={<Login />} />
-  <Route path="/gastos" element={<Gastos />} />
-  <Route path="/dashboard" element={<Dashboard />} />
-  <Route path="/productos" element={<Productos />} />
-  <Route path="/inventario" element={<Productos />} />
-  <Route path="/ingresos" element={<Ingresos />} />
-  <Route path="/contacto" element={<Contacto />} />
-  <Route path="/balance" element={<Balance />} /> 
-</Routes>
-
-      </main>
-    </div>
-  );
+export default function App() {
+  return <BrowserRouter><AuthProvider><Routes>
+    <Route path="/" element={<Inicio />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/registro" element={<Registro />} />
+    <Route element={<ProtectedRoute />}>
+      <Route element={<AppLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/inventario" element={<Productos />} />
+        <Route path="/productos" element={<Navigate to="/inventario" replace />} />
+        <Route path="/compras" element={<Compras />} />
+        <Route path="/ventas" element={<Ventas />} />
+        <Route path="/movimientos" element={<Movimientos />} />
+        <Route path="/ingresos" element={<Navigate to="/movimientos" replace />} />
+        <Route path="/gastos" element={<Navigate to="/movimientos" replace />} />
+        <Route path="/balance" element={<Balance />} />
+        <Route path="/alertas" element={<Alertas />} />
+        <Route path="/reportes" element={<Reportes />} />
+        <Route path="/soporte" element={<Soporte />} />
+        <Route path="/contacto" element={<Navigate to="/soporte" replace />} />
+        <Route path="/comprobantes/:tipo/:id" element={<Comprobante />} />
+        <Route path="/sin-permiso" element={<ErrorPage forbidden />} />
+        <Route element={<ProtectedRoute adminOnly />}><Route path="/usuarios" element={<Usuarios />} /></Route>
+      </Route>
+    </Route>
+    <Route path="*" element={<ErrorPage />} />
+  </Routes></AuthProvider></BrowserRouter>;
 }
-
-function App() {
-  return (
-    // BrowserRouter habilita la navegación basada en URLs dentro de React.
-    <BrowserRouter>
-      <AppLayout />
-    </BrowserRouter>
-  );
-}
-
-export default App;

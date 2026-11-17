@@ -12,6 +12,14 @@
   margin-bottom: 30px;
 }
 
+.dashboard-message {
+  padding: 12px 16px;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 8px;
+  color: #f1aeb4;
+  text-align: center;
+}
+
 .tarjetas {
   display: flex;
   gap: 20px;

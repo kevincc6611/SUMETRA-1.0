@@ -1,50 +1,43 @@
-// Herramientas de React Router para crear enlaces y detectar la ruta activa.
-import { Link, useLocation } from "react-router-dom";
-// Estilos visuales del menú principal.
+import { NavLink, useNavigate } from "react-router-dom";
 import "../styles/menu.css";
 
-// Menú de navegación disponible para usuarios autenticados.
+const enlaces = [
+  ["Inicio", "/"],
+  ["Dashboard", "/dashboard"],
+  ["Ingresos", "/ingresos"],
+  ["Gastos", "/gastos"],
+  ["Productos", "/productos"],
+  ["Balance", "/balance"],
+  ["Alertas", "/alertas"],
+];
+
 function MenuPrincipal() {
-  // Permite resaltar el módulo que se está visualizando.
-  const location = useLocation();
-  // Recupera la sesión guardada para proteger la navegación.
-  const usuario = JSON.parse(localStorage.getItem("usuarioSumetra") || "null");
+  const navigate = useNavigate();
 
-  // No muestra el menú cuando no existe una sesión activa.
-  if (!usuario) return null;
-
-  // Elimina la sesión y devuelve al usuario a la pantalla de acceso.
-  const cerrarSesion = () => {
+  function cerrarSesion() {
     localStorage.removeItem("usuarioSumetra");
-    window.location.href = "/login";
-  };
-
-  // Texto y ruta de cada módulo del sistema.
-  const enlaces = [
-    ["Inicio", "/dashboard"],
-    ["Inventario", "/inventario"],
-    ["Ingresos", "/ingresos"],
-    ["Balance", "/balance"],
-    ["Gastos", "/gastos"],
-    ["Alertas", "/alertas"],
-    ["Soporte", "/contacto"],
-  ];
+    navigate("/login");
+  }
 
   return (
-    // Contenedor de los enlaces y la acción de cerrar sesión.
-    <nav className="nav-principal">
-      {enlaces.map(([nombre, ruta]) => (
-        <Link
-          className={`nav-btn ${location.pathname === ruta ? "is-active" : ""}`}
-          to={ruta}
-          key={ruta}
-        >
-          {nombre}
-        </Link>
-      ))}
-      <button className="nav-btn nav-btn-logout" type="button" onClick={cerrarSesion}>
-        Cerrar sesión
-      </button>
+    <nav className="nav-principal" aria-label="Navegacion principal">
+      <div className="nav-links">
+        {enlaces.map(([texto, ruta]) => (
+          <NavLink
+            key={ruta}
+            to={ruta}
+            end={ruta === "/"}
+            className={({ isActive }) => `nav-btn${isActive ? " is-active" : ""}`}
+          >
+            {texto}
+          </NavLink>
+        ))}
+      </div>
+      <div className="nav-actions">
+        <button type="button" className="nav-btn nav-btn-logout" onClick={cerrarSesion}>
+          Cerrar sesion
+        </button>
+      </div>
     </nav>
   );
 }

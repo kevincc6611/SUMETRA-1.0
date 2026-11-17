@@ -44,6 +44,94 @@
   white-space: nowrap;
 }
 
+.producto-form {
+  margin-bottom: 24px;
+  padding: 20px;
+  border: 1px solid rgba(18, 183, 165, 0.22);
+  border-radius: 14px;
+  background: rgba(15, 29, 42, 0.72);
+}
+
+.producto-form h2 {
+  margin: 0 0 16px;
+  color: #f5fbff;
+  font-size: 1.1rem;
+}
+
+.producto-form-fields {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.5fr) repeat(2, minmax(120px, 0.7fr)) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.producto-form label {
+  display: grid;
+  gap: 7px;
+  color: #9bb3c4;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.producto-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 11px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: rgba(7, 19, 28, 0.72);
+  color: #ebf3f5;
+  font: inherit;
+}
+
+.producto-form input:focus {
+  border-color: #62d8cf;
+  outline: 2px solid rgba(98, 216, 207, 0.18);
+}
+
+.producto-form-actions,
+.productos-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.producto-action {
+  padding: 9px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 7px;
+  background: rgba(148, 163, 184, 0.08);
+  color: #dce9ed;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.producto-action:hover {
+  background: rgba(148, 163, 184, 0.16);
+}
+
+.producto-action-primary {
+  border-color: transparent;
+  background: #12b7a5;
+  color: #062c2a;
+}
+
+.producto-action-primary:hover {
+  background: #62d8cf;
+}
+
+.producto-action-danger {
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f1aeb4;
+}
+
+.producto-action:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .productos-table-wrap {
   overflow-x: auto;
   border: 1px solid rgba(148, 163, 184, 0.16);
@@ -137,5 +225,9 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 14px;
+  }
+
+  .producto-form-fields {
+    grid-template-columns: 1fr;
   }
 }

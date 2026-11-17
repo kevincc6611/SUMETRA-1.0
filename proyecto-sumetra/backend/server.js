@@ -1,79 +1,37 @@
-// server.js
-// Dependencias del servidor HTTP, CORS y conexión con MySQL.
-const express = require("express");
-const cors = require("cors");
-const db = require("./db");
+const { createApp } = require("./app");
+const { config, assertRuntimeConfig } = require("./config");
+const { getPool, closePool } = require("./db");
 
-// Crea la aplicación Express y permite recibir solicitudes JSON desde el frontend.
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// Endpoint: obtiene todos los ingresos registrados.
-app.get("/ingresos", (req, res) => {
-  db.query("SELECT * FROM ingresos", (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(result);
+async function startServer() {
+  assertRuntimeConfig();
+  const pool = getPool();
+  await pool.query("SELECT 1");
+  const app = createApp({ pool });
+  const server = app.listen(config.port, () => {
+    console.log(`SUMETRA API disponible en http://localhost:${config.port}`);
   });
-});
 
-// Endpoint: guarda un nuevo ingreso en MySQL.
-app.post("/ingresos", (req, res) => {
-  const { monto, fecha } = req.body;
-  db.query("INSERT INTO ingresos (monto, fecha) VALUES (?, ?)", [monto, fecha], (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json({ message: "Ingreso guardado", id: result.insertId });
-  });
-});
-
-// Endpoint: obtiene todos los gastos registrados.
-app.get("/gastos", (req, res) => {
-  db.query("SELECT id, monto, fecha, tipo FROM gastos", (err, result) => {
-    if (err) return res.status(500).json({ error: err });
-    res.json(result);
-  });
-});
-
-// Endpoint: guarda un nuevo gasto en MySQL.
-app.post("/gastos", (req, res) => {
-  const { monto, fecha, tipo } = req.body;
-  db.query(
-    "INSERT INTO gastos (monto, fecha, tipo) VALUES (?, ?, ?)",
-    [monto, fecha, tipo],
-    (err, result) => {
-      if (err) return res.status(500).json({ error: err });
-      res.json({ message: "Gasto guardado", id: result.insertId });
-    }
-  );
-});
-
-// Endpoint: obtiene los productos que forman el inventario.
-app.get("/productos", (req, res) => {
-  db.query("SELECT id, nombre, precio, stock FROM productos", (err, result) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(result);
-  });
-});
-
-// Middleware general para responder errores inesperados del servidor.
-app.use((err, req, res, next) => {
-  console.error("Error en el backend:", err);
-  res.status(500).json({ error: "No se pudo completar la operación." });
-});
-
-// Asegura que la tabla de gastos tenga la columna usada por el formulario.
-db.query(
-  "ALTER TABLE gastos ADD COLUMN IF NOT EXISTS tipo VARCHAR(255)",
-  (err) => {
-    if (err) {
-      console.error("Error preparando la tabla gastos:", err);
-    }
+  let closing = false;
+  async function shutdown(signal) {
+    if (closing) return;
+    closing = true;
+    console.log(`Cerrando SUMETRA API (${signal})...`);
+    server.close(async () => {
+      await closePool();
+      process.exit(0);
+    });
+    setTimeout(() => process.exit(1), 10000).unref();
   }
-);
+  process.once("SIGINT", () => shutdown("SIGINT"));
+  process.once("SIGTERM", () => shutdown("SIGTERM"));
+  return server;
+}
 
-// Inicia el backend en el puerto utilizado por el frontend.
-app.listen(3001, () => {
-  console.log("🚀 Backend corriendo en http://localhost:3001");
-});
+if (require.main === module) {
+  startServer().catch((error) => {
+    console.error(`No se pudo iniciar SUMETRA API: ${error.message}`);
+    process.exitCode = 1;
+  });
+}
 
-
+module.exports = { startServer };

@@ -1,33 +1,8 @@
-import { Link } from "react-router-dom";
-import "../styles/form.css";
+import { Link, Navigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-function Inicio() {
-  return (
-    <main className="page-container">
-      <section className="hero hero-finance">
-        <div className="hero-topline">
-          <span className="hero-badge">Sistema financiero</span>
-          <span className="hero-status">Online</span>
-        </div>
-
-        <h1>Gestión contable y operativa de tu negocio</h1>
-
-        <p>
-          Centraliza ventas, clientes, inventario y reportes con una plataforma
-          pensada para operar con precisión, seguridad y control financiero.
-        </p>
-
-        <div className="hero-actions">
-          <Link to="/registro" className="btn btn-primary">
-            Registrarse
-          </Link>
-          <Link to="/login" className="btn btn-secondary">
-            Iniciar sesión
-          </Link>
-        </div>
-      </section>
-    </main>
-  );
+export default function Inicio() {
+  const { authenticated, loading } = useAuth();
+  if (!loading && authenticated) return <Navigate to="/dashboard" replace />;
+  return <main className="landing"><nav className="landing-nav"><div className="brand"><span className="brand-mark">S</span><div><strong>SUMETRA</strong><small>Gestión empresarial</small></div></div><div><Link className="button button-ghost" to="/login">Iniciar sesión</Link><Link className="button button-primary" to="/registro">Crear cuenta</Link></div></nav><section className="landing-hero"><span className="eyebrow">Sistema de gestión para pequeños negocios</span><h1>Controla el inventario y cada movimiento de tu operación.</h1><p>SUMETRA conecta compras, ventas, existencias y movimientos para que trabajes con información consistente y comprobable.</p><div className="hero-actions"><Link className="button button-primary button-large" to="/registro">Empezar ahora</Link><Link className="text-link" to="/login">Ya tengo una cuenta →</Link></div></section><section className="feature-grid"><article><span>01</span><h2>Inventario vivo</h2><p>Compras y ventas actualizan las existencias de forma automática.</p></article><article><span>02</span><h2>Movimientos conectados</h2><p>Cada operación alimenta el balance sin duplicar registros manuales.</p></article><article><span>03</span><h2>Evidencia exportable</h2><p>Consulta por fechas, descarga CSV e imprime comprobantes internos.</p></article></section><footer className="landing-footer"><p>SUMETRA genera comprobantes internos y balances operativos. No reemplaza la facturación electrónica ni estados financieros certificados.</p></footer></main>;
 }
-
-export default Inicio;

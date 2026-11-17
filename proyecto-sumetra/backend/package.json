@@ -1,18 +1,37 @@
 {
   "name": "backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.1.0",
+  "description": "API REST transaccional de SUMETRA",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "env:init": "node scripts/init-env.js",
+    "db:migrate": "node scripts/migrate.js",
+    "db:setup": "node scripts/setup-db.js",
+    "db:reset": "node scripts/reset-db.js",
+    "setup:demo": "node scripts/setup-demo.js",
+    "seed:demo": "node scripts/seed-demo.js",
+    "test": "node --test --test-concurrency=1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "sumetra",
+    "sena",
+    "inventario",
+    "finanzas"
+  ],
+  "author": "Kevin Tabares Carvajal",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.23.4"
+  },
+  "devDependencies": {
+    "supertest": "^7.1.4"
   }
 }
